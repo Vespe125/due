@@ -12,7 +12,7 @@
   --sky1:#c9dcec; --sky2:#9dbad3; --sea1:#4f7597; --sea2:#243f5c; --glare:rgba(255,255,255,.85);
   --ink:#ffffff; --muted:rgba(255,255,255,.72); --faint:rgba(255,255,255,.5);
   --glass:rgba(255,255,255,.16); --glass-2:rgba(255,255,255,.22); --edge:rgba(255,255,255,.45); --edge-soft:rgba(255,255,255,.25);
-  --c-over:#ff9aa8; --c-day:#ffbe8c; --c-3:#ffe38f; --c-7:#a8f0bd; --c-14:#98ecf5; --c-30:#c3d0ff; --c-later:#dccbff; --c-done:rgba(255,255,255,.55);
+  --c-over:#ff9aa8; --c-day:#ffbe8c; --c-3:#ffe38f; --c-7:#a8f0bd; --c-15:#98ecf5; --c-20:#9ed8ff; --c-30:#c3d0ff; --c-later:#dccbff; --c-done:rgba(255,255,255,.55);
   --serif:"Cormorant Garamond","Songti SC","STSong","Noto Serif SC",Georgia,serif;
   --body:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC","Segoe UI",sans-serif;
   box-sizing:border-box;
@@ -145,6 +145,26 @@ button,input{font:inherit;color:inherit}
   .bgmenu{right:0;left:auto}
 }
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
+/* my order */
+.plan-tip{font-size:12.5px;color:var(--muted);margin:0 4px 10px}
+.plan{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pi{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid var(--edge-soft);border-left:4px solid var(--u,transparent)}
+.pi.dragging{opacity:.4}
+.pi.over{box-shadow:0 -3px 0 #fff}
+.pi-n{font-family:var(--serif);font-size:24px;text-align:center;line-height:1}
+.pi-m{min-width:0}
+.pi-t{overflow-wrap:anywhere}
+.pi-s{font-size:12px;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pi-s .cd{font-size:12px}
+.urgs{display:inline-flex;gap:2px}
+.ub{border:1px solid transparent;background:transparent;border-radius:999px;padding:1px 6px;cursor:pointer;font-size:13px;opacity:.45;color:#fff}
+.ub[aria-pressed="true"]{opacity:1;background:rgba(255,255,255,.2);border-color:var(--edge-soft)}
+.mv{display:flex;flex-direction:column;gap:2px}
+.mvb{width:32px;height:28px;border-radius:10px;border:1px solid var(--edge-soft);background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:14px}
+.mvb:disabled{opacity:.25;cursor:default}
+.urg{font-size:11.5px;padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid var(--edge-soft)}
+.u-high{border-color:rgba(255,120,130,.8)} .u-mid{border-color:rgba(255,220,120,.8)} .u-low{border-color:rgba(140,230,160,.8)}
+
 /* mini calendar in hero */
 .hero-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(250px,1fr);gap:16px;margin-bottom:20px;align-items:stretch}
 .hero-row .hero{margin-bottom:0;display:flex;align-items:center}
@@ -287,11 +307,19 @@ label.btn{display:inline-flex;align-items:center}
 
   <nav class="tabs glass" role="tablist" aria-label="视图">
     <button class="tab" role="tab" data-tab="todo" aria-selected="true">待办</button>
+    <button class="tab" role="tab" data-tab="plan" aria-selected="false">我的顺序</button>
     <button class="tab" role="tab" data-tab="week" aria-selected="false">本周 / 下周</button>
     <button class="tab" role="tab" data-tab="cal" aria-selected="false">日历</button>
     <button class="tab" role="tab" data-tab="course" aria-selected="false">课程</button>
   </nav>
 
+  <div class="panel" id="p-plan" hidden>
+    <section class="wk glass">
+      <div class="wk-h"><div class="wk-t">我的做事顺序</div><div class="wk-r">按你自己的安排排，不受截止日期影响</div></div>
+      <div class="plan-tip">用 ↑ ↓ 调整先后（电脑上也可以直接拖动），点 🔴🟡🟢 标紧急程度。新加的作业会自动排在最后。</div>
+      <ol class="plan" id="planList"></ol>
+    </section>
+  </div>
   <div class="panel" id="p-week" hidden></div>
   <div class="panel" id="p-cal" hidden>
     <section class="cal glass">
@@ -340,9 +368,10 @@ label.btn{display:inline-flex;align-items:center}
     <span class="lg" style="--c:var(--c-day)"><span class="dot"></span>🔥 今天或明天</span>
     <span class="lg" style="--c:var(--c-3)"><span class="dot"></span>⚠️ 3 天内</span>
     <span class="lg" style="--c:var(--c-7)"><span class="dot"></span>⏳ 一周内</span>
-    <span class="lg" style="--c:var(--c-14)"><span class="dot"></span>🗓️ 两周内</span>
-    <span class="lg" style="--c:var(--c-30)"><span class="dot"></span>📅 一个月内</span>
-    <span class="lg" style="--c:var(--c-later)"><span class="dot"></span>🌙 一个月以上</span>
+    <span class="lg" style="--c:var(--c-15)"><span class="dot"></span>🗓️ 15 天内</span>
+    <span class="lg" style="--c:var(--c-20)"><span class="dot"></span>📆 20 天内</span>
+    <span class="lg" style="--c:var(--c-30)"><span class="dot"></span>📅 30 天内</span>
+    <span class="lg" style="--c:var(--c-later)"><span class="dot"></span>🌙 30 天以上</span>
   </div>
   <div class="filters" id="filters"></div>
 
@@ -395,13 +424,14 @@ label.btn{display:inline-flex;align-items:center}
     if(n <= 1) return 'day';
     if(n <= 3) return '3';
     if(n <= 7) return '7';
-    if(n <= 14) return '14';
-    if(n <= 31) return '30';
+    if(n <= 15) return '15';
+    if(n <= 20) return '20';
+    if(n <= 30) return '30';
     return 'later';
   }
   const LV = {
     over:{ico:'🚨',name:'已过期'}, day:{ico:'🔥',name:'今天或明天'}, '3':{ico:'⚠️',name:'3 天内'},
-    '7':{ico:'⏳',name:'一周内'}, '14':{ico:'🗓️',name:'两周内'}, '30':{ico:'📅',name:'一个月内'}, later:{ico:'🌙',name:'一个月以上'}, done:{ico:'✅',name:'已完成'}
+    '7':{ico:'⏳',name:'一周内'}, '15':{ico:'🗓️',name:'15 天内'}, '20':{ico:'📆',name:'20 天内'}, '30':{ico:'📅',name:'30 天内'}, later:{ico:'🌙',name:'30 天以上'}, done:{ico:'✅',name:'已完成'}
   };
   function cdParts(ms){
     const a = Math.abs(ms);
@@ -452,7 +482,7 @@ label.btn{display:inline-flex;align-items:center}
     return `<li class="item ${lv==='done'?'done':''}" data-id="${esc(it.id)}" style="--c:var(--c-${v});--t:var(--t-${v})">
       <div class="ico" aria-hidden="true">${L.ico}</div>
       <div class="meta">
-        <div class="line1"><span class="chip" style="--h:${hue(it.code)}">${esc(it.code)}</span><span class="task">${esc(it.task)}</span></div>
+        <div class="line1"><span class="chip" style="--h:${hue(it.code)}">${esc(it.code)}</span><span class="task">${esc(it.task)}</span>${it.urg&&!it.done?`<span class="urg u-${it.urg}">${URG[it.urg].ico} ${URG[it.urg].name}</span>`:''}</div>
         <div class="due">截止：${esc(fmtDue(new Date(it.due)))}</div>
       </div>
       <div class="cdbox">
@@ -709,6 +739,7 @@ label.btn{display:inline-flex;align-items:center}
   function renderSem(){
     const now = new Date();
     renderMini(now);
+    if(tab==='plan') renderPlan(now);
     if(tab==='week') renderWeek(now);
     if(tab==='cal') renderCal(now);
     if(tab==='course') renderCourses();
@@ -716,7 +747,7 @@ label.btn{display:inline-flex;align-items:center}
   function setTab(t){
     tab = t; try{ localStorage.setItem(TAB_KEY, t); }catch(e){}
     document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===t)));
-    ['todo','week','cal','course'].forEach(x=> $('p-'+x).hidden = x!==t);
+    ['todo','plan','week','cal','course'].forEach(x=> $('p-'+x).hidden = x!==t);
     renderSem();
   }
   document.querySelector('.tabs').addEventListener('click', e=>{ const b=e.target.closest('.tab'); if(b) setTab(b.dataset.tab); });
@@ -735,7 +766,7 @@ label.btn{display:inline-flex;align-items:center}
 
 
   const MONTHS_EN = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
-  const LV_RANK = ['over','day','3','7','14','30','later'];
+  const LV_RANK = ['over','day','3','7','15','20','30','later'];
   let miniMonth = null;
   function renderMini(now){
     const el = $('mini'); if(!el) return;
@@ -769,6 +800,62 @@ label.btn{display:inline-flex;align-items:center}
     setTab('cal');
     requestAnimationFrame(()=>document.querySelector('.cal').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth', block:'start'}));
   });
+
+  /* ---------- my order ---------- */
+  const URG = { high:{ico:'🔴',name:'紧急',c:'rgba(255,120,130,.9)'}, mid:{ico:'🟡',name:'一般',c:'rgba(255,220,120,.9)'}, low:{ico:'🟢',name:'不急',c:'rgba(140,230,160,.9)'} };
+  function planItems(){
+    return items.filter(i=>!i.done).sort((a,b)=>{
+      const ra = a.rank ?? Infinity, rb = b.rank ?? Infinity;
+      if(ra!==rb) return ra-rb;
+      return (a.createdAt||0)-(b.createdAt||0) || new Date(a.due)-new Date(b.due);
+    });
+  }
+  function renderPlan(now){
+    const list = planItems(), el = $('planList');
+    if(!list.length){ el.innerHTML = '<li class="wk-empty">没有待完成的作业 🎉</li>'; return; }
+    el.innerHTML = list.map((it,i)=>{
+      const lv = level(it, now), u = it.urg && URG[it.urg];
+      return `<li class="pi" draggable="true" data-id="${esc(it.id)}" style="${u?`--u:${u.c};`:''}--c:var(--c-${lv})">
+        <div class="pi-n">${i+1}</div>
+        <div class="pi-m">
+          <div class="pi-t">${chip(it.code)} ${esc(it.task)}</div>
+          <div class="pi-s"><span class="cd">${cdText(it, now)}</span>
+            <span class="urgs">${Object.entries(URG).map(([k,v])=>`<button type="button" class="ub" data-urg="${k}" aria-pressed="${it.urg===k}" title="${v.name}">${v.ico}</button>`).join('')}</span></div>
+        </div>
+        <div class="mv"><button type="button" class="mvb" data-mv="-1" aria-label="上移" ${i===0?'disabled':''}>↑</button><button type="button" class="mvb" data-mv="1" aria-label="下移" ${i===list.length-1?'disabled':''}>↓</button></div>
+      </li>`;
+    }).join('');
+  }
+  async function saveOrder(ids){
+    const changes = ids.map((id,i)=>[id,i+1]).filter(([id,r])=>{ const it=items.find(x=>x.id===id); return it && it.rank!==r; });
+    if(!db){ changes.forEach(([id,r])=>{ items.find(x=>x.id===id).rank=r; }); lsSave(); render(); return; }
+    changes.forEach(([id,r])=>{ items.find(x=>x.id===id).rank=r; }); render();
+    for(const [id,r] of changes) await db.collection('deadlines').doc(id).update({rank:r});
+  }
+  $('planList').addEventListener('click', e=>{
+    const li = e.target.closest('.pi'); if(!li) return;
+    const id = li.dataset.id, it = items.find(x=>x.id===id); if(!it) return;
+    const ub = e.target.closest('[data-urg]');
+    if(ub){ const v = it.urg===ub.dataset.urg ? null : ub.dataset.urg; safe(()=>updateItem(id,{urg:v})); return; }
+    const mb = e.target.closest('[data-mv]');
+    if(mb){
+      const ids = planItems().map(x=>x.id), i = ids.indexOf(id), j = i + (+mb.dataset.mv);
+      if(j<0||j>=ids.length) return;
+      [ids[i],ids[j]] = [ids[j],ids[i]];
+      safe(()=>saveOrder(ids));
+    }
+  });
+  let dragId = null;
+  $('planList').addEventListener('dragstart', e=>{ const li=e.target.closest('.pi'); if(!li) return; dragId=li.dataset.id; li.classList.add('dragging'); try{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragId); }catch(_){} });
+  $('planList').addEventListener('dragend', e=>{ document.querySelectorAll('.pi').forEach(x=>x.classList.remove('dragging','over')); dragId=null; });
+  $('planList').addEventListener('dragover', e=>{ const li=e.target.closest('.pi'); if(!li||!dragId) return; e.preventDefault(); document.querySelectorAll('.pi.over').forEach(x=>x.classList.remove('over')); li.classList.add('over'); });
+  $('planList').addEventListener('drop', e=>{
+    const li=e.target.closest('.pi'); if(!li||!dragId) return; e.preventDefault();
+    const ids = planItems().map(x=>x.id).filter(x=>x!==dragId), to = ids.indexOf(li.dataset.id);
+    ids.splice(to<0?ids.length:to, 0, dragId);
+    safe(()=>saveOrder(ids));
+  });
+
   /* ---------- import ---------- */
   let pdfLib = null;
   function loadPdfJs(){
@@ -853,7 +940,7 @@ Rules: copy facts exactly as written, never invent dates or numbers; keep notes 
   /* ---------- first-run seed (standalone copy) ---------- */
   try{
     if(localStorage.getItem('due-tracker-seeded-v1')===null){
-      if(localStorage.getItem(LS_KEY)===null) localStorage.setItem(LS_KEY, JSON.stringify([{"id": "note1", "code": "25400", "task": "A2", "due": "2026-10-11T12:59:00.000Z", "done": false, "createdAt": 1790580000000}, {"id": "note2", "code": "25400", "task": "A3", "due": "2026-10-25T12:59:00.000Z", "done": false, "createdAt": 1790580000001}, {"id": "note3", "code": "25400", "task": "Q2", "due": "2026-10-19T12:59:00.000Z", "done": false, "createdAt": 1790580000002}, {"id": "note4", "code": "22208", "task": "A2", "due": "2026-10-12T12:59:00.000Z", "done": false, "createdAt": 1790580000003}, {"id": "note5", "code": "22208", "task": "Exam", "due": "2026-11-03T12:59:00.000Z", "done": false, "createdAt": 1790580000004}, {"id": "note6", "code": "21214", "task": "A2 Pre-PPT", "due": "2026-10-02T13:59:00.000Z", "done": false, "createdAt": 1790580000005}, {"id": "note7", "code": "21214", "task": "A2 Pre（10.8 或 10.15，待确认）", "due": "2026-10-08T12:59:00.000Z", "done": false, "createdAt": 1790580000006}, {"id": "note8", "code": "21214", "task": "A3 essay", "due": "2026-11-05T12:00:00.000Z", "done": false, "createdAt": 1790580000007}, {"id": "note9", "code": "95003", "task": "A3", "due": "2026-10-25T12:59:00.000Z", "done": false, "createdAt": 1790580000008}]));
+      if(localStorage.getItem(LS_KEY)===null) localStorage.setItem(LS_KEY, JSON.stringify([{"code": "25400", "createdAt": 1790580000000, "done": false, "due": "2026-10-11T12:59:00.000Z", "rank": 9, "task": "A2", "id": "note1"}, {"code": "25400", "createdAt": 1790580000001, "done": false, "due": "2026-10-25T12:59:00.000Z", "rank": 1, "task": "A3", "id": "note2"}, {"code": "25400", "createdAt": 1790580000002, "done": false, "due": "2026-10-19T12:59:00.000Z", "rank": 2, "task": "Q2", "id": "note3"}, {"code": "22208", "createdAt": 1790580000003, "done": false, "due": "2026-10-12T12:59:00.000Z", "rank": 3, "task": "A2", "id": "note4"}, {"code": "22208", "createdAt": 1790580000004, "done": false, "due": "2026-11-03T12:59:00.000Z", "rank": 4, "task": "Exam", "id": "note5"}, {"code": "21214", "createdAt": 1790580000005, "done": false, "due": "2026-10-02T13:59:00.000Z", "rank": 5, "task": "A2 Pre-PPT", "id": "note6"}, {"code": "21214", "createdAt": 1790580000006, "done": false, "due": "2026-10-08T12:59:00.000Z", "rank": 6, "task": "A2 Pre（10.8 或 10.15，待确认）", "id": "note7"}, {"code": "21214", "createdAt": 1790580000007, "done": false, "due": "2026-11-05T12:00:00.000Z", "rank": 7, "task": "A3 essay", "id": "note8"}, {"code": "95003", "createdAt": 1790580000008, "done": false, "due": "2026-10-25T12:59:00.000Z", "rank": 8, "task": "A3", "id": "note9"}]));
       if(localStorage.getItem('due-tracker-sem-v1')===null) localStorage.setItem('due-tracker-sem-v1', JSON.stringify({"weeks": [{"label": "Week 1", "start": "2026-07-27", "end": "2026-08-02"}, {"label": "Week 2", "start": "2026-08-03", "end": "2026-08-09"}, {"label": "Week 3", "start": "2026-08-10", "end": "2026-08-16"}, {"label": "Week 4", "start": "2026-08-17", "end": "2026-08-23"}, {"label": "Week 5", "start": "2026-08-24", "end": "2026-08-30"}, {"label": "Week 6", "start": "2026-08-31", "end": "2026-09-06"}, {"label": "Week 7", "start": "2026-09-07", "end": "2026-09-13"}, {"label": "Week 8", "start": "2026-09-14", "end": "2026-09-20"}, {"label": "Break", "start": "2026-09-21", "end": "2026-09-27"}, {"label": "Week 9", "start": "2026-09-28", "end": "2026-10-04"}, {"label": "Week 10", "start": "2026-10-05", "end": "2026-10-11"}, {"label": "Week 11", "start": "2026-10-12", "end": "2026-10-18"}, {"label": "Week 12", "start": "2026-10-19", "end": "2026-10-25"}, {"label": "Week 13", "start": "2026-10-26", "end": "2026-11-01"}], "events": [{"date": "2026-07-27", "code": "25400", "title": "Time Value of Money I"}, {"date": "2026-07-30", "code": "95003", "title": "tut Module 1: The current state of play"}, {"date": "2026-07-31", "code": "22208", "title": "Introduction to recording accounting information"}, {"date": "2026-08-03", "code": "25400", "title": "Time Value of Money II"}, {"date": "2026-08-04", "code": "95003", "title": "Online Module 2: Why aim for 'regenerative'?"}, {"date": "2026-08-06", "code": "21214", "title": "1 Business and Social Impact: An Introduction"}, {"date": "2026-08-07", "code": "22208", "title": "1 Recording economic events"}, {"date": "2026-08-10", "code": "25400", "title": "Personal Financial Management"}, {"date": "2026-08-13", "code": "95003", "title": "tut Module 2: Why aim for 'regenerative'?", "assess": "Assessment 1 30%"}, {"date": "2026-08-13", "code": "21214", "title": "1 Social Responsibility: Creating Shared Value (CSV)"}, {"date": "2026-08-14", "code": "22208", "title": "1 Recording adjusting entries and trial balance"}, {"date": "2026-08-17", "code": "25400", "title": "Banking and Loans"}, {"date": "2026-08-18", "code": "95003", "title": "Online Module 3: Systems & stakeholders", "assess": "Assessment 2 40%"}, {"date": "2026-08-20", "code": "21214", "title": "1 Indigenous Perspectives on Business and Social Impact", "assess": "In-class Quiz 1 10%"}, {"date": "2026-08-21", "code": "22208", "title": "1 Accounting for different business structures"}, {"date": "2026-08-24", "code": "25400", "title": "Stocks and Bonds"}, {"date": "2026-08-27", "code": "95003", "title": "tut Module 3: Systems & stakeholders"}, {"date": "2026-08-27", "code": "21214", "title": "2 Evaluating Social Impact Information: CSR"}, {"date": "2026-08-28", "code": "22208", "title": "2 Practical issues: Receivables"}, {"date": "2026-08-31", "code": "25400", "title": "In-class Quiz 1", "assess": "In-class Quiz 1 30%"}, {"date": "2026-09-01", "code": "95003", "title": "Online Module 4: Engaging with the real world"}, {"date": "2026-09-03", "code": "21214", "title": "2 Stakeholders of Business and Social Impact"}, {"date": "2026-09-04", "code": "22208", "title": "2 Practical issues: Inventory (Perpetual method)"}, {"date": "2026-09-07", "code": "25400", "title": "Financial Statements Analysis"}, {"date": "2026-09-10", "code": "95003", "title": "tut Module 4: Engaging with the real world"}, {"date": "2026-09-10", "code": "21214", "title": "2 Beyond CSR: Marketing Impact"}, {"date": "2026-09-11", "code": "22208", "title": "2 Practical issues: Property, plant and equipment"}, {"date": "2026-09-14", "code": "25400", "title": "Cost of Capital and Capital Budgeting"}, {"date": "2026-09-15", "code": "95003", "title": "Online Module 5: Bringing it all together", "assess": "Assessment 2 40%"}, {"date": "2026-09-17", "code": "21214", "title": "2 Financial Sustainability and Supply Chains", "assess": "In-class Quiz 2 10%"}, {"date": "2026-09-18", "code": "22208", "title": "2 Practical Issues: Cash Flow Statements"}, {"date": "2026-09-28", "code": "25400", "title": "Investment Strategies and Portfolio Management", "assess": "Assessment 2: Group Assignment - Financial Model 30%"}, {"date": "2026-10-01", "code": "95003", "title": "tut Module 5: Bringing it all together"}, {"date": "2026-10-01", "code": "21214", "title": "3 Leadership and Social Impact"}, {"date": "2026-10-02", "code": "22208", "title": "3 Law and Ethics"}, {"date": "2026-10-05", "code": "25400", "title": "Startups and ESG Investing"}, {"date": "2026-10-06", "code": "95003", "title": "Online Research, refinement & reflexivity"}, {"date": "2026-10-08", "code": "21214", "title": "Assessment 2: Presentations", "assess": "Assessment 2: Presentations 15%"}, {"date": "2026-10-09", "code": "22208", "title": "3 Performance measurement and evaluation"}, {"date": "2026-10-12", "code": "25400", "title": "Fintech and Crypto Assets", "assess": "Assessment 3: Individual Analyst Presentation 10%"}, {"date": "2026-10-15", "code": "95003", "title": "tut Research, refinement & reflexivity"}, {"date": "2026-10-15", "code": "21214", "title": "Assessment 2: Presentations", "assess": "Assessment 2: Presentations 15%"}, {"date": "2026-10-16", "code": "22208", "title": "3 Sustainability, accounting and decision-making", "assess": "Assessment 2 20%"}, {"date": "2026-10-19", "code": "25400", "title": "In-class Quiz 2", "assess": "In-class Quiz 2 30%"}, {"date": "2026-10-20", "code": "95003", "title": "Online? Pitch doctor", "assess": "Assessment 3 30%"}, {"date": "2026-10-22", "code": "21214", "title": "3 Defining Your Mission for Social Impact", "assess": "Assessment 3: Reflective Essay 40%"}, {"date": "2026-10-23", "code": "22208", "title": "3 Integrating accounting, business and society"}], "courses": [{"code": "95003", "name": "TD: Sustainability in an interconnected world", "mode": ["一周线下 tut，一周线上会议", "需提前查看课程内容"], "attendance": "tut 至少出勤 5 次", "assessments": [{"name": "Assessment 1 · 60s 视频", "weight": "30%", "when": "7.20"}, {"name": "Assessment 2 · 采访报告", "weight": "40%", "when": "8.17"}, {"name": "Assessment 3 · 小组演讲", "weight": "30%", "when": "9.14"}], "notes": [], "recurring": [], "aliases": []}, {"code": "25400", "name": "Financial Literacy", "mode": ["线上视频 + 线下 ws", "需提前查看线上视频材料，线下解答并进行课程活动"], "attendance": "未说明，按 80% 计算", "assessments": [{"name": "Assessment 1 · 两次课堂测验", "weight": "60%", "when": "第 6 周 8.31、第 12 周 10.19", "detail": "各 30%"}, {"name": "Assessment 2 · 小组作业", "weight": "30%", "detail": "做一个 Excel 表格财务模型"}, {"name": "Assessment 3 · 财务模型的 presentation", "weight": "10%"}], "notes": ["计算较多，需要带电脑并安装 Excel"], "recurring": [], "aliases": []}, {"code": "22208", "name": "Accounting, Business and Society", "mode": ["lecture（讲座）在线观看", "workshop（研讨会）不强制参与，不记考勤", "tutorial（合作）参与评定 Assessment 1B"], "attendance": "ws 可不去；tut 课上完成 As1B 的评定，尽量全勤", "assessments": [{"name": "Assessment 1 Part A · 每周线上测验（个人）", "weight": "10%", "when": "第 2–11 周，每周四晚上截止，上课之前完成", "detail": "取 10 次里最高的 8 次成绩"}, {"name": "Assessment 1 Part B · tut 小组合作作业", "weight": "20%", "when": "第 2–12 周", "detail": "取 11 次里最高的 8 次成绩；需要提前五分钟进入班级；内容需要在课程结束后 15 分钟内提交"}, {"name": "Assessment 2 · 个人作业", "weight": "20%", "detail": "制作一个视频"}, {"name": "Assessment 3 · 最终考试", "weight": "50%", "when": "第十周发布时间"}], "notes": ["Assessment 1 日常作业/测验合计 30%"], "recurring": [{"weekday": 4, "title": "Assessment 1 Part A 线上测验今晚截止", "fromWeek": 2, "toWeek": 11}], "aliases": []}, {"code": "21214", "name": "Business and Social Impact", "mode": ["tut", "在课程之前需要在 Canvas 上观看本周课程讲座和材料", "每两周会有一个 quiz 测验"], "attendance": "80%", "assessments": [{"name": "Assessment 1 · 日常测验", "weight": "20%", "when": "第 4 周 8.20（10%）、第 8 周 9.17（10%）", "detail": "课堂上完成，不允许延期"}, {"name": "Assessment 2 · 小组作业", "weight": "40%", "when": "9.25 晚上 10 点前小组报告（25%）；第 10 周 10.8 小组演讲（15%）"}, {"name": "Assessment 3 · 反思性论文", "weight": "40%", "when": "11.5 晚上 11 点之前"}], "notes": [], "recurring": [], "aliases": []}], "aliases": {"22008": "22208"}, "importedAt": 1790580000000}));
       localStorage.setItem('due-tracker-seeded-v1','1');
     }
