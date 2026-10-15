@@ -161,13 +161,31 @@ button,input{font:inherit;color:inherit}
   .plan-add #pTask{grid-column:1/-1}
   .plan-add .btn{grid-column:1/-1}
 }
+
+.prog{display:flex;align-items:center;gap:10px;margin-top:8px}
+.prog-w{position:relative;flex:1;height:22px}
+.prog-w .trk{position:absolute;left:9px;right:9px;top:50%;height:4px;margin-top:-2px;border-radius:4px;background:rgba(255,255,255,.18);overflow:hidden}
+.prog-w .fill{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);background:linear-gradient(90deg,rgba(255,255,255,.55),#fff);border-radius:4px}
+.prog-w .ticks{position:absolute;left:9px;right:9px;top:50%;height:0;pointer-events:none}
+.prog-w .ticks i{position:absolute;top:-3px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:rgba(255,255,255,.35)}
+.prog-w .ticks i.on{background:#fff}
+.prog-w input[type=range]{position:absolute;inset:0;width:100%;height:100%;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer;touch-action:none}
+.prog-w input[type=range]:focus{outline:none}
+.prog-w input[type=range]::-webkit-slider-runnable-track{height:22px;background:transparent;border:0}
+.prog-w input[type=range]::-moz-range-track{height:22px;background:transparent;border:0}
+.prog-w input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:2px;border-radius:50%;background:#fff;border:0;box-shadow:0 1px 6px rgba(10,30,55,.35),0 0 0 3px rgba(255,255,255,.25)}
+.prog-w input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:0;box-shadow:0 1px 6px rgba(10,30,55,.35),0 0 0 3px rgba(255,255,255,.25)}
+.prog-w input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px #fff,0 0 0 6px rgba(35,64,94,.6)}
+.prog-v{min-width:44px;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.prog-v.full{color:#fff;font-weight:600}
+.pbadge{font-size:11.5px;padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid var(--edge-soft);font-variant-numeric:tabular-nums}
 /* my order */
 .plan-tip{font-size:12.5px;color:var(--muted);margin:0 4px 10px}
 .plan{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .pi{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid var(--edge-soft);border-left:4px solid var(--u,transparent)}
 .pi.dragging{opacity:.4}
 .pi.over{box-shadow:0 -3px 0 #fff}
-.pi-n{font-family:var(--serif);font-size:24px;text-align:center;line-height:1}
+.pi-n{font-family:var(--serif);font-size:24px;text-align:center;line-height:1;cursor:grab;user-select:none;padding:6px 0}
 .pi-m{min-width:0}
 .pi-t{overflow-wrap:anywhere}
 .pi-s{font-size:12px;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -332,7 +350,7 @@ label.btn{display:inline-flex;align-items:center}
   <div class="panel" id="p-plan" hidden>
     <section class="wk glass">
       <div class="wk-h"><div class="wk-t">顺序</div><div class="wk-r">按你自己的安排排，不受截止日期影响</div></div>
-      <div class="plan-tip">用 ↑ ↓ 调整先后（电脑上也可以直接拖动），点 🔴🟡🟢 标紧急程度，在备注框里写具体要做什么，会自动保存。这里可以单独加条目，不填截止日期也行。</div>
+      <div class="plan-tip">用 ↑ ↓ 调整先后（电脑上也可以按住左边的序号拖动），拖动进度条记录做了多少，点 🔴🟡🟢 标紧急程度，在备注框里写具体要做什么，会自动保存。这里可以单独加条目，不填截止日期也行。</div>
       <form class="plan-add" id="planForm" autocomplete="off">
         <input id="pTask" placeholder="新增一条" maxlength="120" required aria-label="内容">
         <input id="pCode" placeholder="课程代码（选填）" maxlength="20" aria-label="课程代码">
@@ -504,7 +522,7 @@ label.btn{display:inline-flex;align-items:center}
     return `<li class="item ${lv==='done'?'done':''}" data-id="${esc(it.id)}" style="--c:var(--c-${v});--t:var(--t-${v})">
       <div class="ico" aria-hidden="true">${L.ico}</div>
       <div class="meta">
-        <div class="line1"><span class="chip" style="--h:${hue(it.code)}">${esc(it.code)}</span><span class="task">${esc(it.task)}</span>${it.urg&&!it.done?`<span class="urg u-${it.urg}">${URG[it.urg].ico} ${URG[it.urg].name}</span>`:''}</div>
+        <div class="line1"><span class="chip" style="--h:${hue(it.code)}">${esc(it.code)}</span><span class="task">${esc(it.task)}</span>${it.urg&&!it.done?`<span class="urg u-${it.urg}">${URG[it.urg].ico} ${URG[it.urg].name}</span>`:''}${it.prog&&!it.done?`<span class="pbadge">已做 ${it.prog}%</span>`:''}</div>
         <div class="due">截止：${esc(fmtDue(new Date(it.due)))}</div>
       </div>
       <div class="cdbox">
@@ -835,18 +853,19 @@ label.btn{display:inline-flex;align-items:center}
   function renderPlan(now){
     const el = $('planList');
     const act = document.activeElement;
-    if(act && act.classList && act.classList.contains('note') && el.contains(act)) return; // don't interrupt typing
+    if(act && el.contains(act) && (act.classList.contains('note') || act.type==='range') && document.hasFocus()) { if(act.type!=='range' || act.matches(':active')) return; }
     const list = planItems();
     if(!list.length){ el.innerHTML = '<li class="wk-empty">没有待完成的事项 🎉</li>'; return; }
     el.innerHTML = list.map((it,i)=>{
       const lv = it.due ? level(it, now) : 'later', u = it.urg && URG[it.urg];
-      return `<li class="pi" draggable="true" data-id="${esc(it.id)}" style="${u?`--u:${u.c};`:''}--c:var(--c-${lv})">
-        <div class="pi-n">${i+1}</div>
+      return `<li class="pi" data-id="${esc(it.id)}" style="${u?`--u:${u.c};`:''}--c:var(--c-${lv})">
+        <div class="pi-n" draggable="true" title="拖动排序">${i+1}</div>
         <div class="pi-m">
           <div class="pi-t">${it.code?chip(it.code)+' ':''}${esc(it.task)}</div>
           <div class="pi-s">${it.due?`<span class="cd">${cdText(it, now)}</span>`:'<span class="nodue">无截止日期</span>'}
             <span class="urgs">${Object.entries(URG).map(([k,v])=>`<button type="button" class="ub" data-urg="${k}" aria-pressed="${it.urg===k}" title="${v.name}">${v.ico}</button>`).join('')}</span>
             <span class="pi-acts"><button type="button" class="ib" data-pact="done">✓ 完成</button>${it.due?'':'<button type="button" class="ib" data-pact="del">删除</button>'}</span></div>
+          <div class="prog">${progHTML(it.prog||0)}<span class="prog-v${(it.prog||0)>=100?' full':''}">${progLabel(it.prog||0)}</span></div>
           <textarea class="note" rows="1" placeholder="&lt;3" aria-label="备注" draggable="false">${esc(it.note||'')}</textarea>
         </div>
         <div class="mv"><button type="button" class="mvb" data-mv="-1" aria-label="上移" ${i===0?'disabled':''}>↑</button><button type="button" class="mvb" data-mv="1" aria-label="下移" ${i===list.length-1?'disabled':''}>↓</button></div>
@@ -854,6 +873,26 @@ label.btn{display:inline-flex;align-items:center}
     }).join('');
     el.querySelectorAll('.note').forEach(fitNote);
   }
+  const progLabel = v => v>=100 ? '完成 ✓' : `${v}%`;
+  function progHTML(v){
+    let ticks=''; for(let k=0;k<=100;k+=10) ticks+=`<i class="${k<=v?'on':''}" style="left:${k}%"></i>`;
+    return `<div class="prog-w" style="--p:${v}%"><div class="trk"><div class="fill"></div></div><div class="ticks">${ticks}</div>
+      <input type="range" min="0" max="100" step="10" value="${v}" aria-label="完成进度" draggable="false"></div>`;
+  }
+  function paintProg(r){
+    const v = +r.value, w = r.closest('.prog-w');
+    w.style.setProperty('--p', v+'%');
+    w.querySelectorAll('.ticks i').forEach((t,k)=>t.classList.toggle('on', k*10<=v));
+    const lab = r.closest('.prog').querySelector('.prog-v'); lab.textContent = progLabel(v); lab.classList.toggle('full', v>=100);
+  }
+  $('planList').addEventListener('input', e=>{ const r = e.target.closest('input[type=range]'); if(r) paintProg(r); });
+  $('planList').addEventListener('change', e=>{
+    const r = e.target.closest('input[type=range]'); if(!r) return;
+    const id = r.closest('.pi').dataset.id, it = items.find(x=>x.id===id); if(!it) return;
+    const v = +r.value; if((it.prog||0)===v) return;
+    it.prog = v;
+    safe(()=>updateItem(id,{prog:v}), v>=100 ? '做完啦，记得点「✓ 完成」' : null);
+  });
   function fitNote(t){ t.style.height='auto'; t.style.height = t.scrollHeight+2+'px'; }
   const noteTimers = {};
   function saveNote(t){
@@ -907,7 +946,7 @@ label.btn{display:inline-flex;align-items:center}
     }
   });
   let dragId = null;
-  $('planList').addEventListener('dragstart', e=>{ if(e.target.closest && e.target.closest('.note')){ e.preventDefault(); return; } const li=e.target.closest('.pi'); if(!li) return; dragId=li.dataset.id; li.classList.add('dragging'); try{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragId); }catch(_){} });
+  $('planList').addEventListener('dragstart', e=>{ if(e.target.closest && e.target.closest('.note, input[type=range]')){ e.preventDefault(); return; } const li=e.target.closest('.pi'); if(!li) return; dragId=li.dataset.id; li.classList.add('dragging'); try{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragId); }catch(_){} });
   $('planList').addEventListener('dragend', e=>{ document.querySelectorAll('.pi').forEach(x=>x.classList.remove('dragging','over')); dragId=null; });
   $('planList').addEventListener('dragover', e=>{ const li=e.target.closest('.pi'); if(!li||!dragId) return; e.preventDefault(); document.querySelectorAll('.pi.over').forEach(x=>x.classList.remove('over')); li.classList.add('over'); });
   $('planList').addEventListener('drop', e=>{
